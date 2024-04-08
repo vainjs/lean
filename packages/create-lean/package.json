@@ -1,10 +1,14 @@
 {
-  "name": "@vainjs/lean",
-  "version": "0.0.0",
+  "name": "create-lean",
+  "version": "1.0.0",
   "description": "",
   "main": "dist/index.cjs",
+  "type": "module",
+  "bin": {
+    "create-vue": "dist/index.cjs"
+  },
   "scripts": {
-    "build": "rollup"
+    "build": "rollup -c"
   },
   "keywords": [],
   "author": "",
@@ -12,13 +16,16 @@
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
+    "@types/ejs": "^3.1.5",
     "@types/node": "^20.12.3",
+    "@types/prompts": "^2.4.9",
     "glob": "^10.3.12",
     "rollup": "^4.14.1",
-    "rollup-plugin-clear": "^2.0.7",
-    "typescript": "^5.4.3"
+    "rollup-plugin-clear": "^2.0.7"
   },
   "dependencies": {
-    "commander": "^11.1.0"
+    "ejs": "^3.1.9",
+    "kolorist": "^1.8.0",
+    "prompts": "^2.4.2"
   }
 }

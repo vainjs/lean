@@ -1,20 +1,20 @@
 #!/usr/bin/env node
-import { Command } from "commander";
+import { Command } from 'commander'
+import packageJson from './package.json'
 // import spawn from 'cross-spawn';
 // import fs from 'fs';
-import packageJson from "./package.json";
 
-const program = new Command();
+const program = new Command()
 
-program.version(packageJson.version, "-v, --version");
+program.version(packageJson.version, '-v, --version')
 
 program
-  .command("create <projectName>")
-  .description("create new project")
-  .option("-t, --template <template>", "vue3,react,npm", "npm")
-  .action(function (projectName, template) {
-    console.log(projectName, template);
-  });
+  .command('create <projectName>')
+  .description('create new project')
+  .option('-t, --template <template>', 'vue3,react,npm', 'npm')
+  .action((projectName, template) => {
+    console.log(projectName, template)
+  })
 
 // program
 //   .command('dev')
@@ -32,4 +32,4 @@ program
 
 // program.command('lint').description('lint').action(runLint);
 
-program.parse(process.argv);
+program.parse(process.argv)
