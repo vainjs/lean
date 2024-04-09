@@ -38,6 +38,10 @@
         "singleQuote": true,
         "semi": false
       }
-    ]
+    ],
+    "import/prefer-default-export": "off",
+    "import/no-unresolved": "off",
+    "consistent-return": "off",
+    "import/extensions": "off"
   }
 }

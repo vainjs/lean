@@ -4,7 +4,6 @@ import clear from 'rollup-plugin-clear'
 import path from 'node:path'
 import pkg from './package.json' assert { type: 'json' }
 
-const external = Object.keys(pkg.peerDependencies || {})
 const cjsDir = path.parse(pkg.main).dir
 
 export default [
@@ -24,6 +23,5 @@ export default [
       typescript({ compilerOptions: { declaration: false } }),
       process.env.NODE_ENV === 'production' && terser(),
     ],
-    external,
   },
 ]

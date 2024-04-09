@@ -6,6 +6,7 @@
   "scripts": {
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prepare": "husky",
+    "dev": "turbo dev",
     "build": "turbo build"
   },
   "devDependencies": {

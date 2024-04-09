@@ -5,10 +5,11 @@
   "main": "dist/index.cjs",
   "type": "module",
   "bin": {
-    "create-vue": "dist/index.cjs"
+    "create-lean": "dist/index.cjs"
   },
   "scripts": {
-    "build": "rollup -c"
+    "dev": "rollup -c -w",
+    "build": "rollup -c --environment NODE_ENV:production"
   },
   "keywords": [],
   "author": "",
