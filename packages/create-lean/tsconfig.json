@@ -17,5 +17,5 @@
     "baseUrl": ".",
     "outDir": "dist"
   },
-  "include": ["**/*.ts", "rollup.config.js"]
+  "include": ["**/*.ts", "**/*.tsx"]
 }

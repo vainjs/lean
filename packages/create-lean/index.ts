@@ -1,22 +1,19 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 
-import { red } from 'kolorist'
 import * as path from 'node:path'
 import * as fs from 'node:fs'
-// import ejs from 'ejs'
-import { getPrompts } from './utils'
-
-type PromptsResult = {
-  needsTypeScript?: boolean
-  needsPrettier?: boolean
-  needsEslint?: boolean
-  projectName: string
-}
+import { getPrompts, renderTemplate, PromptsResult } from './utils'
 
 async function init() {
   const result = (await getPrompts()) as PromptsResult
-  const { projectName, needsTypeScript, needsEslint, needsPrettier } = result
+  const {
+    needsCommitList,
+    needsPrettier,
+    projectName,
+    projectType,
+    needsEslint,
+  } = result
   const src = path.join(process.cwd(), projectName)
 
   if (fs.existsSync(src)) {
@@ -27,11 +24,23 @@ async function init() {
 
   console.log(`\n正在初始化项目 ${src}...`)
 
-  const pkg = { name: projectName, version: '0.0.0' }
-  fs.writeFileSync(
-    path.resolve(src, 'package.json'),
-    JSON.stringify(pkg, null, 2)
-  )
+  const templateRoot = path.resolve(__dirname, '../', 'templates')
+  const render = (type: string) => {
+    renderTemplate(path.join(templateRoot, type), src, result)
+  }
+  render(projectType)
+
+  if (needsPrettier) {
+    render('prettier')
+  }
+
+  if (needsEslint) {
+    render('eslint')
+  }
+
+  if (needsCommitList) {
+    render('commitlint')
+  }
 }
 
 init().catch((e) => {

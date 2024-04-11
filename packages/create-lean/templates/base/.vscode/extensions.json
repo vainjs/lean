@@ -1,8 +1,0 @@
-{
-  "recommendations": [
-    "clinyong.vscode-css-modules",
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "editorconfig.editorconfig"
-  ]
-}
