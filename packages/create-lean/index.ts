@@ -5,6 +5,8 @@ import * as path from 'node:path'
 import * as fs from 'node:fs'
 import { getPrompts, renderTemplate, PromptsResult } from './utils'
 
+const dirname = path.resolve(__dirname, '../')
+
 async function init() {
   const result = (await getPrompts()) as PromptsResult
   const {
@@ -24,7 +26,7 @@ async function init() {
 
   console.log(`\n正在初始化项目 ${src}...`)
 
-  const templateRoot = path.resolve(__dirname, '../', 'templates')
+  const templateRoot = path.resolve(dirname, 'templates')
   const render = (type: string) => {
     renderTemplate(path.join(templateRoot, type), src, result)
   }

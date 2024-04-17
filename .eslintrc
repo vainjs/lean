@@ -1,50 +1,9 @@
 {
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": 7,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
-    }
-  },
-  "env": {
-    "es6": true,
-    "node": true,
-    "browser": true
-  },
-  "globals": {
-    "document": true,
-    "navigator": true,
-    "window": true
-  },
-  "ignorePatterns": [
-    "dist",
-    "templates"
-  ],
   "extends": [
-    "airbnb",
-    "plugin:react/jsx-runtime",
-    "plugin:react-hooks/recommended",
-    "plugin:prettier/recommended"
+    "@vainjs/eslint-config/typescript"
   ],
-  "plugins": [
-    "react",
-    "jsx-a11y",
-    "import"
-  ],
-  "rules": {
-    "prettier/prettier": [
-      "error",
-      {
-        "singleQuote": true,
-        "semi": false
-      }
-    ],
-    "import/prefer-default-export": "off",
-    "import/no-unresolved": "off",
-    "consistent-return": "off",
-    "import/extensions": "off",
-    "no-restricted-syntax": "off",
-    "no-return-await": "off"
-  }
+  "ignorePatterns": [
+    "templates",
+    "dist"
+  ]
 }
