@@ -1,20 +1,40 @@
 module.exports = {
-  extends: ['eslint-config-airbnb-base'],
+  env: {
+    node: true,
+    es6: true,
+  },
+  parserOptions: {
+    sourceType: 'module',
+    ecmaVersion: 6,
+  },
+  extends: ['eslint:recommended', 'plugin:import/recommended'],
+  plugins: ['import'],
   rules: {
-    'prefer-destructuring': [
+    'import/order': [
+      'error',
+      { groups: [['builtin', 'external', 'internal']] },
+    ],
+    'import/no-anonymous-default-export': [
       'error',
       {
-        object: true,
-      },
-      {
-        enforceForRenamedProperties: false,
+        allowLiteral: true,
+        allowObject: true,
+        allowArray: true,
       },
     ],
-    'import/prefer-default-export': 'off',
-    'import/no-unresolved': 'off',
-    'no-restricted-syntax': 'off',
-    'consistent-return': 'off',
-    'import/extensions': 'off',
-    'no-return-await': 'off',
+    'no-empty-function': [
+      'error',
+      {
+        allow: ['arrowFunctions'],
+      },
+    ],
+    'import/no-cycle': ['error', { maxDepth: '∞' }],
+    'import/no-relative-packages': 'error',
+    'import/newline-after-import': 'error',
+    'import/no-absolute-path': 'error',
+    'import/no-named-default': 'error',
+    'import/no-self-import': 'error',
+    'import/first': 'error',
+    'no-console': 'warn',
   },
 }
