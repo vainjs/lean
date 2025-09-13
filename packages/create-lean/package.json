@@ -1,0 +1,26 @@
+{
+  "name": "create-lean",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dist/index.cjs",
+  "type": "module",
+  "bin": {
+    "create-lean": "dist/index.cjs"
+  },
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/lodash-es": "^4.17.12",
+    "@types/node": "^20.12.3",
+    "@types/prompts": "^2.4.9"
+  },
+  "dependencies": {
+    "ejs": "^3.1.9",
+    "kolorist": "^1.8.0",
+    "lodash-es": "^4.17.21",
+    "prompts": "^2.4.2"
+  }
+}

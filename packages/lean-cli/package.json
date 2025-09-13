@@ -1,0 +1,37 @@
+{
+  "name": "@vainjs/lean-cli",
+  "version": "0.0.0",
+  "description": "A lean development tool for front-end",
+  "main": "dist/index.js",
+  "bin": {
+    "lean": "dist/index.js"
+  },
+  "scripts": {
+    "build": "rolldown -c",
+    "dev": "rolldown -c --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.7",
+    "@types/lodash.merge": "^4.6.9",
+    "@types/node": "^20.12.3",
+    "glob": "^10.3.12",
+    "rolldown": "1.0.0-beta.37",
+    "rollup-plugin-copy": "^3.5.0",
+    "typescript": "^5.4.3"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "ejs": "^3.1.10",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^9.2.15",
+    "lodash.merge": "^4.6.2",
+    "ora": "^8.0.1",
+    "sort-package-json": "^3.4.0"
+  }
+}

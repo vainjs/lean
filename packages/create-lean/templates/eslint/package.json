@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@vainjs/eslint-config": "workspace:*",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix"
+    ]
+  }
+}
