@@ -1,0 +1,40 @@
+{
+  "name": "@vainjs/eslint-config",
+  "description": "Out-of-the-box ESLint configuration",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "echo '✓ ESLint config ready'"
+  },
+  "files": [
+    "base.js",
+    "next.js",
+    "react.js",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./base.js",
+    "./nextjs": "./next.js",
+    "./react": "./react.js"
+  },
+  "author": "young",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@eslint/js": "^9.34.0",
+    "@next/eslint-plugin-next": "^15.5.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^16.3.0",
+    "typescript-eslint": "^8.40.0"
+  },
+  "peerDependencies": {
+    "eslint": "^9.0.0 || ^10.0.0",
+    "prettier": "^3.6.0",
+    "typescript": "^5.9.0"
+  }
+}

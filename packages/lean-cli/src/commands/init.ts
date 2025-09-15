@@ -1,107 +1,108 @@
+import type { ConfigFileData } from '../type'
+import * as p from '@clack/prompts'
 import merge from 'lodash.merge'
-import inquirer from 'inquirer'
 import chalk from 'chalk'
-import ora from 'ora'
 import {
-  detectPackageManager,
   installDependencies,
   updatePackageJson,
   renderConfigFiles,
-  printError,
-  print,
+  getGithubActions,
+  handleCancel,
 } from '../utils'
-import { CONFIG_TEMPLATES } from '../config'
-
-type ConfigChoice = {
-  checked: boolean
-  value: string
-  name: string
-}
+import {
+  CONFIG_TEMPLATES,
+  PACKAGE_MANAGER,
+  INITIAL_VALUES,
+  OPTIONS,
+} from '../config'
 
 export async function initCommand() {
-  print(chalk.bold('Welcome to Lean CLI! 👋'))
+  console.log()
+  p.intro(chalk.cyan('@vainjs/lean-cli'))
+
   try {
-    const choices: ConfigChoice[] = [
-      {
-        name: 'ESLint',
-        value: 'eslint',
-        checked: true,
-      },
-      {
-        name: 'Commitlint',
-        value: 'commitlint',
-        checked: true,
-      },
-    ]
+    const configs = handleCancel(
+      await p.multiselect({
+        message: 'Select tools:',
+        initialValues: INITIAL_VALUES,
+        options: OPTIONS,
+        required: true,
+      })
+    )
 
-    const answers = await inquirer.prompt([
-      {
-        type: 'checkbox',
-        name: 'configs',
-        message: 'Select the configs:',
-        choices,
-        validate: (input: string[]) => {
-          if (input.length === 0) {
-            return chalk.red('Please select at least one config.')
-          }
-          return true
-        },
-      },
-    ])
+    const configFileData = await getGithubActions(configs)
 
-    const size = answers.configs.length
-    if (size <= 0) return
+    const proceed = handleCancel(
+      await p.confirm({
+        message: 'Apply configurations?',
+        initialValue: true,
+      })
+    )
 
-    const confirm = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'proceed',
-        message: `Apply ${size} config${size > 1 ? 's' : ''}?`,
-        default: true,
-      },
-    ])
-
-    if (confirm.proceed) {
-      await applyconfigs(answers.configs)
+    if (proceed) {
+      await applyconfigs(configs, configFileData)
     } else {
-      print(chalk.yellow('config cancelled.'))
+      p.log.warn('Operation Cancelled!')
     }
   } catch (error) {
-    printError('Error during config', error)
+    p.log.error(chalk.red(error))
+    process.exit(0)
   }
 }
 
-async function applyconfigs(selectedConfigs: string[]) {
-  const spinner = ora('Applying configs...').start()
+function getConfig(selectedConfigs: string[], configFileData: ConfigFileData) {
+  let configFiles: string[] = [...configFileData.files]
+  let packageUpdates = {}
 
-  try {
-    let configFiles: string[] = []
-    let packageUpdates = {}
-
-    for (const type of selectedConfigs) {
-      const config = CONFIG_TEMPLATES[type]
-      if (!config) continue
-      if (config.file) {
-        configFiles = configFiles.concat(config.file || [])
-      }
-      if (config.pkgConfig) {
-        packageUpdates = merge(packageUpdates, config.pkgConfig)
-      }
-      spinner.text = `Applying ${type} config...`
+  for (const type of [...selectedConfigs, PACKAGE_MANAGER]) {
+    const config = CONFIG_TEMPLATES[type]
+    if (!config) continue
+    if (config.file) {
+      configFiles = configFiles.concat(config.file || [])
     }
-
-    // spinner.text = 'Updating package.json...'
-    // await updatePackageJson(packageUpdates)
-
-    // spinner.text = 'Installing dependencies...'
-    // const packageManager = detectPackageManager()
-    // await installDependencies(packageManager)
-
-    spinner.text = 'Generate config files...'
-    await renderConfigFiles(configFiles)
-
-    spinner.succeed(chalk.green('config completed successfully!'))
-  } catch (error) {
-    printError('Apply config failed', error)
+    if (config.pkgConfig) {
+      packageUpdates = merge(packageUpdates, config.pkgConfig)
+    }
   }
+
+  if (configFiles.some((file) => file.includes('.husky'))) {
+    packageUpdates = merge(packageUpdates, CONFIG_TEMPLATES['husky'].pkgConfig)
+  }
+
+  return { configFiles, packageUpdates }
+}
+
+async function applyconfigs(
+  selectedConfigs: string[],
+  configFileData: ConfigFileData
+) {
+  const { configFiles, packageUpdates } = getConfig(
+    selectedConfigs,
+    configFileData
+  )
+  const commonVariables = INITIAL_VALUES.reduce(
+    (config, option) => ({
+      ...config,
+      [option]: selectedConfigs.includes(option),
+    }),
+    {}
+  )
+  await renderConfigFiles(
+    configFiles,
+    configFiles.reduce(
+      (acc, filePath) => ({
+        ...acc,
+        [filePath]: {
+          ...commonVariables,
+          ...configFileData.variables[filePath],
+        },
+      }),
+      {}
+    )
+  )
+  await updatePackageJson(packageUpdates)
+  await installDependencies()
+
+  p.note('Run `lean --help` for more commands.', 'Configuration successfully!')
+  console.log()
 }
