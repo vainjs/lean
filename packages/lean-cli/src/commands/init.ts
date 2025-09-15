@@ -1,78 +1,57 @@
+import * as p from '@clack/prompts'
 import merge from 'lodash.merge'
-import inquirer from 'inquirer'
 import chalk from 'chalk'
-import ora from 'ora'
-import {
-  detectPackageManager,
-  installDependencies,
-  updatePackageJson,
-  renderConfigFiles,
-  printError,
-  print,
-} from '../utils'
+import { detectPackageManager, installDependencies, updatePackageJson, renderConfigFiles } from '../utils'
 import { CONFIG_TEMPLATES } from '../config'
 
-type ConfigChoice = {
-  checked: boolean
-  value: string
-  name: string
+function handleCancel<T>(result: T | symbol): T {
+  if (p.isCancel(result)) {
+    p.cancel('Operation cancelled.')
+    process.exit(0)
+  }
+  return result as T
 }
 
 export async function initCommand() {
-  print(chalk.bold('Welcome to Lean CLI! 👋'))
   try {
-    const choices: ConfigChoice[] = [
-      {
-        name: 'ESLint',
-        value: 'eslint',
-        checked: true,
-      },
-      {
-        name: 'Commitlint',
-        value: 'commitlint',
-        checked: true,
-      },
-    ]
+    const configs = handleCancel(
+      await p.multiselect({
+        message: 'Which configurations would you like to set up for your project?',
+        options: [
+          {
+            label: 'ESLint',
+            value: 'eslint',
+          },
+          {
+            label: 'Commitlint',
+            value: 'commitlint',
+          },
+        ],
+        initialValues: ['eslint', 'commitlint'],
+        required: true,
+      })
+    )
 
-    const answers = await inquirer.prompt([
-      {
-        type: 'checkbox',
-        name: 'configs',
-        message: 'Select the configs:',
-        choices,
-        validate: (input: string[]) => {
-          if (input.length === 0) {
-            return chalk.red('Please select at least one config.')
-          }
-          return true
-        },
-      },
-    ])
+    const proceed = handleCancel(
+      await p.confirm({
+        message: `Ready to apply the configurations selected above? This will modify your project files.`,
+        initialValue: true,
+      })
+    )
 
-    const size = answers.configs.length
-    if (size <= 0) return
-
-    const confirm = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'proceed',
-        message: `Apply ${size} config${size > 1 ? 's' : ''}?`,
-        default: true,
-      },
-    ])
-
-    if (confirm.proceed) {
-      await applyconfigs(answers.configs)
+    if (proceed) {
+      await applyconfigs(configs)
     } else {
-      print(chalk.yellow('config cancelled.'))
+      p.outro(chalk.yellow('Config cancelled.'))
     }
   } catch (error) {
-    printError('Error during config', error)
+    p.cancel(chalk.red(error))
   }
 }
 
 async function applyconfigs(selectedConfigs: string[]) {
-  const spinner = ora('Applying configs...').start()
+  const spinner = p.spinner()
+  spinner.start('Applying configurations...')
 
   try {
     let configFiles: string[] = []
@@ -87,21 +66,20 @@ async function applyconfigs(selectedConfigs: string[]) {
       if (config.pkgConfig) {
         packageUpdates = merge(packageUpdates, config.pkgConfig)
       }
-      spinner.text = `Applying ${type} config...`
     }
 
-    // spinner.text = 'Updating package.json...'
+    await renderConfigFiles(configFiles)
+
+    // spinner.message('Updating package.json...')
     // await updatePackageJson(packageUpdates)
 
-    // spinner.text = 'Installing dependencies...'
+    // spinner.message('Installing dependencies...')
     // const packageManager = detectPackageManager()
     // await installDependencies(packageManager)
 
-    spinner.text = 'Generate config files...'
-    await renderConfigFiles(configFiles)
-
-    spinner.succeed(chalk.green('config completed successfully!'))
+    spinner.stop('Configurations completed successfully!')
+    p.outro(chalk.green('✓ All configurations have been applied!'))
   } catch (error) {
-    printError('Apply config failed', error)
+    p.cancel(chalk.red(error))
   }
 }

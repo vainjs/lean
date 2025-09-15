@@ -13,5 +13,5 @@ export function printError(message: string, error?: unknown): void {
   } else {
     console.error(chalk.red(message))
   }
-  process.exit(1)
+  process.exit(0)
 }
