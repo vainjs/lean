@@ -1,1 +1,0 @@
-{ "extends": [ "@vainjs/eslint-config/typescript" ] }
