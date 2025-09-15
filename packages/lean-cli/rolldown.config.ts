@@ -7,6 +7,7 @@ export default defineConfig({
     banner: '#!/usr/bin/env node',
     file: 'dist/index.js',
     format: 'cjs',
+    minify: true,
   },
   platform: 'node',
   external: (id) => {

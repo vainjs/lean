@@ -1,6 +1,6 @@
-import { Command } from 'commander'
 import { readFileSync } from 'fs'
 import { join } from 'path'
+import { Command } from 'commander'
 import { initCommand } from './commands/init'
 
 const getVersion = () => {
@@ -15,8 +15,14 @@ const getVersion = () => {
 
 const program = new Command()
 
-program.name('lean').description('A lean development tool for front-end').version(getVersion())
+program
+  .name('lean')
+  .description('A lean development tool for front-end')
+  .version(getVersion())
 
-program.command('init').description('Initialize development configurations').action(initCommand)
+program
+  .command('init')
+  .description('Initialize development configurations')
+  .action(initCommand)
 
 program.parse()
