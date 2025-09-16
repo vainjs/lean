@@ -8,7 +8,7 @@ export const CONFIG_TEMPLATES: ConfigTemplates = {
         'lint-staged': '^16.1.4',
       },
       'lint-staged': {
-        '*.{ts,tsx,js}': ['eslint --fix'],
+        '*.{ts,tsx,js,jsx}': ['eslint --fix'],
       },
     },
     file: ['.husky/pre-commit', 'eslint.config.js.ejs'],

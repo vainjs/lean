@@ -1,7 +1,6 @@
 import * as p from '@clack/prompts'
 import merge from 'lodash.merge'
-import chalk from 'chalk'
-import { detectPackageManager, installDependencies, updatePackageJson, renderConfigFiles } from '../utils'
+import { installDependencies, updatePackageJson, renderConfigFiles } from '../utils'
 import { CONFIG_TEMPLATES } from '../config'
 
 function handleCancel<T>(result: T | symbol): T {
@@ -42,44 +41,32 @@ export async function initCommand() {
     if (proceed) {
       await applyconfigs(configs)
     } else {
-      p.outro(chalk.yellow('Config cancelled.'))
+      p.log.warn('Config cancelled.')
     }
   } catch (error) {
-    p.cancel(chalk.red(error))
+    p.log.error(String(error))
   }
 }
 
 async function applyconfigs(selectedConfigs: string[]) {
-  const spinner = p.spinner()
-  spinner.start('Applying configurations...')
+  let configFiles: string[] = []
+  let packageUpdates = {}
 
-  try {
-    let configFiles: string[] = []
-    let packageUpdates = {}
-
-    for (const type of selectedConfigs) {
-      const config = CONFIG_TEMPLATES[type]
-      if (!config) continue
-      if (config.file) {
-        configFiles = configFiles.concat(config.file || [])
-      }
-      if (config.pkgConfig) {
-        packageUpdates = merge(packageUpdates, config.pkgConfig)
-      }
+  for (const type of selectedConfigs) {
+    const config = CONFIG_TEMPLATES[type]
+    if (!config) continue
+    if (config.file) {
+      configFiles = configFiles.concat(config.file || [])
     }
-
-    await renderConfigFiles(configFiles)
-
-    // spinner.message('Updating package.json...')
-    // await updatePackageJson(packageUpdates)
-
-    // spinner.message('Installing dependencies...')
-    // const packageManager = detectPackageManager()
-    // await installDependencies(packageManager)
-
-    spinner.stop('Configurations completed successfully!')
-    p.outro(chalk.green('✓ All configurations have been applied!'))
-  } catch (error) {
-    p.cancel(chalk.red(error))
+    if (config.pkgConfig) {
+      packageUpdates = merge(packageUpdates, config.pkgConfig)
+    }
   }
+
+  await renderConfigFiles(configFiles)
+  await updatePackageJson(packageUpdates)
+  await installDependencies()
+
+  p.log.success('All configurations have been applied')
+  p.outro('Run `lean help` to get started.')
 }
