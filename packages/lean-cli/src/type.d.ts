@@ -1,5 +1,5 @@
 export type ConfigTemplate = {
-  pkgConfig?: Record<string, Record<string, any>>
+  pkgConfig?: Record<string, Record<string, any> | string>
   file?: string[]
 }
 

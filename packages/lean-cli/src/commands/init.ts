@@ -1,39 +1,49 @@
 import * as p from '@clack/prompts'
 import merge from 'lodash.merge'
-import { installDependencies, updatePackageJson, renderConfigFiles } from '../utils'
-import { CONFIG_TEMPLATES } from '../config'
-
-function handleCancel<T>(result: T | symbol): T {
-  if (p.isCancel(result)) {
-    p.cancel('Operation cancelled.')
-    process.exit(0)
-  }
-  return result as T
-}
+import {
+  detectPackageManager,
+  installDependencies,
+  updatePackageJson,
+  renderConfigFiles,
+  handleCancel,
+} from '../utils'
+import { CONFIG_TEMPLATES, INITIAL_VALUES } from '../config'
 
 export async function initCommand() {
   try {
     const configs = handleCancel(
       await p.multiselect({
-        message: 'Which configurations would you like to set up for your project?',
+        message: 'Select additional tools.',
         options: [
           {
-            label: 'ESLint',
+            label: 'TypeScript',
+            value: 'typescript',
+          },
+          {
+            label: 'ESLint + Prettier',
             value: 'eslint',
           },
           {
-            label: 'Commitlint',
+            label: 'CommitLint',
             value: 'commitlint',
           },
+          {
+            label: 'Changelog',
+            value: 'changelog',
+          },
+          {
+            label: 'GitHub Actions',
+            value: 'githubActions',
+          },
         ],
-        initialValues: ['eslint', 'commitlint'],
+        initialValues: INITIAL_VALUES,
         required: true,
       })
     )
 
     const proceed = handleCancel(
       await p.confirm({
-        message: `Ready to apply the configurations selected above? This will modify your project files.`,
+        message: `Apply selected configurations?`,
         initialValue: true,
       })
     )
@@ -41,18 +51,20 @@ export async function initCommand() {
     if (proceed) {
       await applyconfigs(configs)
     } else {
-      p.log.warn('Config cancelled.')
+      p.log.warn('Operation Cancelled.')
     }
   } catch (error) {
     p.log.error(String(error))
+    process.exit(0)
   }
 }
 
 async function applyconfigs(selectedConfigs: string[]) {
+  const packageManager = detectPackageManager()
   let configFiles: string[] = []
   let packageUpdates = {}
 
-  for (const type of selectedConfigs) {
+  for (const type of [...selectedConfigs, packageManager]) {
     const config = CONFIG_TEMPLATES[type]
     if (!config) continue
     if (config.file) {
@@ -63,10 +75,35 @@ async function applyconfigs(selectedConfigs: string[]) {
     }
   }
 
-  await renderConfigFiles(configFiles)
-  await updatePackageJson(packageUpdates)
-  await installDependencies()
+  if (configFiles.some((file) => file.includes('.husky'))) {
+    packageUpdates = merge(packageUpdates, CONFIG_TEMPLATES['husky'].pkgConfig)
+  }
 
-  p.log.success('All configurations have been applied')
-  p.outro('Run `lean help` to get started.')
+  if (
+    selectedConfigs.includes('typescript') &&
+    selectedConfigs.includes('eslint')
+  ) {
+    packageUpdates = merge(
+      packageUpdates,
+      CONFIG_TEMPLATES['typescriptEslint'].pkgConfig
+    )
+  }
+
+  await renderConfigFiles(
+    configFiles,
+    INITIAL_VALUES.reduce(
+      (config, option) => ({
+        ...config,
+        [option]: selectedConfigs.includes(option),
+      }),
+      {}
+    )
+  )
+  await updatePackageJson(packageUpdates)
+  await installDependencies(packageManager)
+
+  p.note(
+    'Run `lean --help` for more commands.',
+    'Configuration applied successfully!'
+  )
 }
