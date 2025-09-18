@@ -6,9 +6,21 @@
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky"
   },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "@vainjs/eslint-config": "workspace:*",
     "conventional-changelog-cli": "^5.0.0",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.8",

@@ -1,4 +1,7 @@
 import type { ConfigTemplates } from '../type'
+import { detectPackageManager } from '../utils'
+
+export const PACKAGE_MANAGER = detectPackageManager()
 
 export const CONFIG_TEMPLATES: ConfigTemplates = {
   pnpm: {
@@ -28,7 +31,7 @@ export const CONFIG_TEMPLATES: ConfigTemplates = {
         '*.{ts,tsx,js,jsx}': ['eslint --fix', 'prettier --write'],
       },
     },
-    file: ['.husky/pre-commit', 'eslint.config.js.ejs', '.prettierrc.ejs'],
+    file: ['.husky/pre-commit', 'eslint.config.mjs.ejs', '.prettierrc.ejs'],
   },
   typescriptEslint: {
     pkgConfig: {
@@ -70,14 +73,66 @@ export const CONFIG_TEMPLATES: ConfigTemplates = {
     },
   },
   githubActions: {
-    file: ['.github/workflows/npm-publish.yml.ejs'],
+    options: [
+      {
+        label: 'NPM Publish',
+        value: '.github/workflows/npm-publish.yml.ejs',
+        config: [
+          {
+            placeholder: 'The command to build your project',
+            variable: 'buildCommand',
+            label: 'Build Command',
+            value: 'build',
+          },
+        ],
+      },
+      {
+        label: 'Deploy Docs',
+        value: '.github/workflows/deploy-docs.yml.ejs',
+        config: [
+          {
+            placeholder: 'The command to build your project',
+            variable: 'buildCommand',
+            label: 'Build Command',
+            value: 'docs:build',
+          },
+          {
+            placeholder: 'Output path for built documentation assets',
+            variable: 'assetsPath',
+            label: 'Assets Path',
+            value: 'docs/.vitepress/dist',
+          },
+        ],
+      },
+    ],
   },
 }
 
-export const INITIAL_VALUES = [
-  'eslint',
-  'typescript',
-  'commitlint',
-  'changelog',
-  'githubActions',
+export const OPTIONS = [
+  {
+    label: 'TypeScript',
+    value: 'typescript',
+  },
+  {
+    label: 'ESLint + Prettier',
+    value: 'eslint',
+  },
+  {
+    label: 'CommitLint',
+    value: 'commitlint',
+  },
+  {
+    label: 'Changelog',
+    value: 'changelog',
+  },
+  {
+    label: 'GitHub Actions',
+    value: 'githubActions',
+  },
+]
+
+export const INITIAL_VALUES = OPTIONS.map((option) => option.value)
+
+export const GITHUB_ACTIONS_INITIAL_VALUES = [
+  CONFIG_TEMPLATES.githubActions.options![0].value,
 ]

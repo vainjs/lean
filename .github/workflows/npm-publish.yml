@@ -43,7 +43,7 @@ jobs:
         run: pnpm install
 
       - name: Build project
-        run: pnpm <%= buildCommand || 'build' %>
+        run: pnpm build
 
       - name: Configure Git
         run: |
@@ -55,12 +55,10 @@ jobs:
           pnpm version ${{ github.event.inputs.version_type }} --no-git-tag-version
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-          <% if (changelog) { %>
+          
           pnpm changelog
           git add package.json CHANGELOG.md
-          <% } else { %>
-          git add package.json
-          <% } %>
+          
           git commit -m "chore: bump version to v$NEW_VERSION"
           git tag "v$NEW_VERSION"
 
@@ -80,11 +78,9 @@ jobs:
           tag_name: v${{ env.NEW_VERSION }}
           name: v${{ env.NEW_VERSION }}
           body: |
-            <% if (changelog) { %>
+            
             For detailed changes and updates, please refer to the [CHANGELOG.md](${{ github.server_url }}/${{ github.repository }}/blob/main/CHANGELOG.md).
-            <% } else { %>
-            Release v${{ env.NEW_VERSION }}
-            <% } %>
+            
           draft: false
           prerelease: false
         env:

@@ -1,57 +1,44 @@
+import type { ConfigFileData } from '../type'
 import * as p from '@clack/prompts'
 import merge from 'lodash.merge'
 import {
-  detectPackageManager,
   installDependencies,
   updatePackageJson,
   renderConfigFiles,
+  getGithubActions,
   handleCancel,
 } from '../utils'
-import { CONFIG_TEMPLATES, INITIAL_VALUES } from '../config'
+import {
+  CONFIG_TEMPLATES,
+  PACKAGE_MANAGER,
+  INITIAL_VALUES,
+  OPTIONS,
+} from '../config'
 
 export async function initCommand() {
   try {
     const configs = handleCancel(
       await p.multiselect({
-        message: 'Select additional tools.',
-        options: [
-          {
-            label: 'TypeScript',
-            value: 'typescript',
-          },
-          {
-            label: 'ESLint + Prettier',
-            value: 'eslint',
-          },
-          {
-            label: 'CommitLint',
-            value: 'commitlint',
-          },
-          {
-            label: 'Changelog',
-            value: 'changelog',
-          },
-          {
-            label: 'GitHub Actions',
-            value: 'githubActions',
-          },
-        ],
+        message: 'Select tools:',
         initialValues: INITIAL_VALUES,
+        options: OPTIONS,
         required: true,
       })
     )
 
+    const configFileData = await getGithubActions(configs)
+
     const proceed = handleCancel(
       await p.confirm({
-        message: `Apply selected configurations?`,
+        message: 'Apply configurations?',
         initialValue: true,
       })
     )
 
     if (proceed) {
-      await applyconfigs(configs)
+      await applyconfigs(configs, configFileData)
     } else {
-      p.log.warn('Operation Cancelled.')
+      p.log.warn('Operation Cancelled!')
     }
   } catch (error) {
     p.log.error(String(error))
@@ -59,12 +46,11 @@ export async function initCommand() {
   }
 }
 
-async function applyconfigs(selectedConfigs: string[]) {
-  const packageManager = detectPackageManager()
-  let configFiles: string[] = []
+function getConfig(selectedConfigs: string[], configFileData: ConfigFileData) {
+  let configFiles: string[] = [...configFileData.files]
   let packageUpdates = {}
 
-  for (const type of [...selectedConfigs, packageManager]) {
+  for (const type of [...selectedConfigs, PACKAGE_MANAGER]) {
     const config = CONFIG_TEMPLATES[type]
     if (!config) continue
     if (config.file) {
@@ -89,21 +75,39 @@ async function applyconfigs(selectedConfigs: string[]) {
     )
   }
 
+  return { configFiles, packageUpdates }
+}
+
+async function applyconfigs(
+  selectedConfigs: string[],
+  configFileData: ConfigFileData
+) {
+  const { configFiles, packageUpdates } = getConfig(
+    selectedConfigs,
+    configFileData
+  )
+  const commonVariables = INITIAL_VALUES.reduce(
+    (config, option) => ({
+      ...config,
+      [option]: selectedConfigs.includes(option),
+    }),
+    {}
+  )
   await renderConfigFiles(
     configFiles,
-    INITIAL_VALUES.reduce(
-      (config, option) => ({
-        ...config,
-        [option]: selectedConfigs.includes(option),
+    configFiles.reduce(
+      (acc, filePath) => ({
+        ...acc,
+        [filePath]: {
+          ...commonVariables,
+          ...configFileData.variables[filePath],
+        },
       }),
       {}
     )
   )
   await updatePackageJson(packageUpdates)
-  await installDependencies(packageManager)
+  await installDependencies()
 
-  p.note(
-    'Run `lean --help` for more commands.',
-    'Configuration applied successfully!'
-  )
+  p.note('Run `lean --help` for more commands.', 'Configuration successfully!')
 }

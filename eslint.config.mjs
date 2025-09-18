@@ -1,0 +1,4 @@
+import { config } from '@vainjs/eslint-config/base'
+
+/** @type {import("eslint").Linter.Config} */
+export default config

@@ -1,4 +1,4 @@
-import type { DataItem } from '../type'
+import type { ConfigFileData } from '../type'
 import sortPackageJson from 'sort-package-json'
 import { exec } from 'child_process'
 import * as p from '@clack/prompts'
@@ -8,12 +8,17 @@ import fs from 'fs-extra'
 import path from 'path'
 import ejs from 'ejs'
 import os from 'os'
+import {
+  GITHUB_ACTIONS_INITIAL_VALUES,
+  CONFIG_TEMPLATES,
+  PACKAGE_MANAGER,
+} from '../config'
 
 const SUFFIX = '.ejs'
 
 export function handleCancel<T>(result: T | symbol): T {
   if (p.isCancel(result)) {
-    p.cancel('Operation cancelled.')
+    p.cancel('Operation cancelled!')
     process.exit(0)
   }
   return result as T
@@ -87,7 +92,7 @@ function getOutputPath(templatePath: string): string {
   return templatePath
 }
 
-async function renderSingleFile(filePath: string, data: DataItem) {
+async function renderSingleFile(filePath: string, variables = {}) {
   const templatePath = path.join(__dirname, 'templates', filePath)
 
   if (!(await fs.pathExists(templatePath))) {
@@ -97,7 +102,7 @@ async function renderSingleFile(filePath: string, data: DataItem) {
 
   const templateContent = await fs.readFile(templatePath, 'utf-8')
   const outputContent = filePath.endsWith(SUFFIX)
-    ? ejs.render(templateContent, data)
+    ? ejs.render(templateContent, variables)
     : templateContent
 
   const outputPath = path.join(getProjectRoot(), getOutputPath(filePath))
@@ -105,24 +110,25 @@ async function renderSingleFile(filePath: string, data: DataItem) {
   await fs.writeFile(outputPath, outputContent, 'utf-8')
 }
 
-export async function renderConfigFiles(files: string[], data: DataItem = {}) {
+export async function renderConfigFiles(
+  files: string[],
+  variables: ConfigFileData['variables'] = {}
+) {
   const spinner = p.spinner()
-  spinner.start('Generating configuration files.')
+  spinner.start('Generating files')
 
   for (const filePath of files) {
-    await renderSingleFile(filePath, data)
+    await renderSingleFile(filePath, variables[filePath])
   }
 
-  spinner.stop(
-    `Generated ${files.length} configuration file${files.length > 1 ? 's.' : '.'}`
-  )
+  spinner.stop(`Generated ${files.length} file${files.length > 1 ? 's' : ''}`)
 }
 
 export async function updatePackageJson(
   updates: Record<string, any>
 ): Promise<void> {
   const spinner = p.spinner()
-  spinner.start('Updating package.json.')
+  spinner.start('Updating package.json')
 
   const packageJsonPath = path.join(getProjectRoot(), 'package.json')
   const packageJson = await fs.readJson(packageJsonPath)
@@ -131,7 +137,7 @@ export async function updatePackageJson(
     spaces: 2,
   })
 
-  spinner.stop('Updated package.json.')
+  spinner.stop('Updated package.json')
 }
 
 export function detectPackageManager(): 'npm' | 'yarn' | 'pnpm' {
@@ -163,26 +169,63 @@ export function detectPackageManager(): 'npm' | 'yarn' | 'pnpm' {
   }
 }
 
-export async function installDependencies(
-  packageManager: string
-): Promise<void> {
+export async function installDependencies(): Promise<void> {
   const shouldInstall = handleCancel(
     await p.confirm({
-      message: `Install dependencies via ${packageManager}?`,
+      message: `Install dependencies via ${PACKAGE_MANAGER}?`,
       initialValue: true,
     })
   )
 
   if (shouldInstall) {
     const spinner = p.spinner()
-    spinner.start('Installing dependencies.')
-    await promisify(exec)(`${packageManager} install`, {
+    spinner.start('Installing dependencies')
+    await promisify(exec)(`${PACKAGE_MANAGER} install`, {
       cwd: getProjectRoot(),
     })
     spinner.stop('Installed dependencies.')
   } else {
     p.log.warn(
-      `Skipped dependency installation. run '${packageManager} install' manually when ready.`
+      `Skipped installation. Run '${PACKAGE_MANAGER} install' manually`
     )
   }
+}
+
+export async function getGithubActions(
+  configs: string[] = []
+): Promise<ConfigFileData> {
+  if (!configs.includes('githubActions')) return { files: [], variables: {} }
+
+  const selectedActions = handleCancel(
+    await p.multiselect({
+      options: CONFIG_TEMPLATES.githubActions.options!,
+      initialValues: GITHUB_ACTIONS_INITIAL_VALUES,
+      message: 'Select GitHub Actions:',
+      required: false,
+    })
+  )
+
+  const variables: ConfigFileData['variables'] = {}
+
+  for (const filePath of selectedActions) {
+    variables[filePath] = {}
+    const option = CONFIG_TEMPLATES.githubActions.options!.find(
+      (opt) => opt.value === filePath
+    )
+    if (!option) continue
+    p.log.info(`Configuring ${option.label}`)
+
+    for (const configItem of option.config) {
+      const value = handleCancel(
+        await p.text({
+          placeholder: `${configItem.placeholder} (default: ${configItem.value})`,
+          defaultValue: configItem.value,
+          message: configItem.label,
+        })
+      )
+      variables[filePath][configItem.variable] = value
+    }
+  }
+
+  return { files: selectedActions, variables }
 }
