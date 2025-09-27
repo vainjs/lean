@@ -1,6 +1,6 @@
 {
   "name": "@vainjs/lean-cli",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A lean development tool for front-end",
   "main": "dist/index.js",
   "bin": {

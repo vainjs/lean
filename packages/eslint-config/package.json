@@ -1,7 +1,7 @@
 {
   "name": "@vainjs/eslint-config",
   "description": "Out-of-the-box ESLint configuration",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "build": "echo '✓ ESLint config ready'"
