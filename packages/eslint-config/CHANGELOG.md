@@ -1,5 +1,11 @@
 # @vainjs/eslint-config
 
+## 0.2.0
+
+### Minor Changes
+
+- optimize react rules ([`3a1214d`](https://github.com/vainjs/lean/commit/3a1214d778a28d4c80a0de696bca35b2cae617c2))
+
 ## 0.1.0
 
 ### Minor Changes
