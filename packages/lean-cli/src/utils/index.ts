@@ -9,11 +9,7 @@ import merge from 'lodash.merge'
 import chalk from 'chalk'
 import fs from 'fs-extra'
 import ejs from 'ejs'
-import {
-  GITHUB_ACTIONS_INITIAL_VALUES,
-  CONFIG_TEMPLATES,
-  PACKAGE_MANAGER,
-} from '../config'
+import { CONFIG_TEMPLATES, PACKAGE_MANAGER } from '../config'
 
 const SUFFIX = '.ejs'
 
@@ -209,37 +205,24 @@ export async function getGithubActions(
   configs: string[] = []
 ): Promise<ConfigFileData> {
   if (!configs.includes('githubActions')) return { files: [], variables: {} }
+  const options = CONFIG_TEMPLATES.githubActions.options!
 
   const selectedActions = handleCancel(
     await p.multiselect({
-      options: CONFIG_TEMPLATES.githubActions.options!,
-      initialValues: GITHUB_ACTIONS_INITIAL_VALUES,
+      options: options,
       message: 'Select GitHub Actions:',
       required: false,
     })
   )
 
-  const variables: ConfigFileData['variables'] = {}
-
-  for (const filePath of selectedActions) {
-    variables[filePath] = {}
-    const option = CONFIG_TEMPLATES.githubActions.options!.find(
-      (opt) => opt.value === filePath
-    )
-    if (!option) continue
-    p.log.info(`Configuring ${option.label}`)
-
-    for (const configItem of option.config) {
-      const value = handleCancel(
-        await p.text({
-          placeholder: `${configItem.placeholder} (default: ${configItem.value})`,
-          defaultValue: configItem.value,
-          message: configItem.label,
-        })
-      )
-      variables[filePath][configItem.variable] = value
+  if (selectedActions.length > 0) {
+    for (const filePath of selectedActions) {
+      const option = options.find((opt) => opt.value === filePath)
+      if (option?.hint) {
+        p.note(option.hint, option.label)
+      }
     }
   }
 
-  return { files: selectedActions, variables }
+  return { files: selectedActions, variables: {} }
 }

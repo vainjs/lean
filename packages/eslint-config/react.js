@@ -32,6 +32,7 @@ export default [
       ],
       'jsx-quotes': ['error', 'prefer-double'],
       'react/jsx-indent': ['error', 2],
+      'react/react-in-jsx-scope': 'off',
     },
   },
 ]

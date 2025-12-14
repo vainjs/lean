@@ -25,7 +25,12 @@ export const CONFIG_TEMPLATES: ConfigTemplates = {
         '*.{ts,tsx,js,jsx}': ['eslint --fix', 'prettier --write'],
       },
     },
-    file: ['.husky/pre-commit', 'eslint.config.mjs.ejs', '.prettierrc.ejs'],
+    file: [
+      '.husky/pre-commit',
+      'eslint.config.mjs.ejs',
+      '.prettierrc.ejs',
+      '.editorconfig.ejs',
+    ],
   },
   commitlint: {
     pkgConfig: {
@@ -64,32 +69,12 @@ export const CONFIG_TEMPLATES: ConfigTemplates = {
       {
         label: 'NPM Publish',
         value: '.github/workflows/npm-publish.yml.ejs',
-        config: [
-          {
-            placeholder: 'The command to build your project',
-            variable: 'buildCommand',
-            label: 'Build Command',
-            value: 'build',
-          },
-        ],
+        hint: 'Auto publish packages to NPM (build: pnpm build)',
       },
       {
         label: 'Deploy Docs',
         value: '.github/workflows/deploy-docs.yml.ejs',
-        config: [
-          {
-            placeholder: 'The command to build your project',
-            variable: 'buildCommand',
-            label: 'Build Command',
-            value: 'docs:build',
-          },
-          {
-            placeholder: 'Output path for built documentation assets',
-            variable: 'assetsPath',
-            label: 'Assets Path',
-            value: 'docs/.vitepress/dist',
-          },
-        ],
+        hint: 'Deploy docs to GitHub Pages (build: pnpm build, output: docs/dist)',
       },
     ],
   },
@@ -115,7 +100,3 @@ export const OPTIONS = [
 ]
 
 export const INITIAL_VALUES = OPTIONS.map((option) => option.value)
-
-export const GITHUB_ACTIONS_INITIAL_VALUES = [
-  CONFIG_TEMPLATES.githubActions.options![0].value,
-]

@@ -1,16 +1,9 @@
 import type { Option } from '@clack/prompts'
 
-export type GitHubActionOption = Option<string> & {
-  config: Array<{
-    placeholder?: string
-    variable: string
-    label: string
-    value: string
-  }>
-}
+export type GitHubActionOption = Option<string>
 
 export type ConfigTemplate = {
-  pkgConfig?: Record<string, Record<string, any> | string>
+  pkgConfig?: Record<string, Record<string, unknown> | string>
   options?: Array<GitHubActionOption>
   file?: string[]
 }

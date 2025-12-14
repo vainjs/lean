@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version_type:
-        description: "Version bump type"
+        description: "Select version bump type"
         required: true
-        default: "patch"
+        default: "minor"
         type: choice
         options:
           - patch
@@ -43,12 +43,12 @@ jobs:
         run: pnpm install
 
       - name: Build project
-        run: pnpm <%= buildCommand || 'build' %>
+        run: pnpm build
 
       - name: Configure Git
         run: |
-          git config --local user.email "${{ github.event.pusher.email || format('{0}@users.noreply.github.com', github.actor) }}"
-          git config --local user.name "${{ github.actor }}"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
 
       - name: Bump version and create tag
         run: |
@@ -61,7 +61,7 @@ jobs:
           <% } else { %>
           git add package.json
           <% } %>
-          git commit -m "chore: bump version to v$NEW_VERSION"
+          git commit -m "chore(release): v$NEW_VERSION"
           git tag "v$NEW_VERSION"
 
       - name: Publish to NPM

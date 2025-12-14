@@ -35,19 +35,14 @@ jobs:
       - name: Build packages
         run: pnpm build
 
-      - name: Configure Git
-        run: |
-          git config --local user.email "${{ github.event.pusher.email || format('{0}@users.noreply.github.com', github.actor) }}"
-          git config --local user.name "${{ github.actor }}"
-
-      - name: Publish to npm
+      - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
+          version: pnpm changeset version
           publish: pnpm changeset publish
-          title: "🚀 Release New Version"
+          title: "chore: release packages"
           commit: "chore: release packages"
-          setupGitUser: false
           createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
