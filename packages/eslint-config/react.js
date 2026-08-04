@@ -10,6 +10,7 @@ import baseConfig from './base.js'
 export default [
   ...baseConfig,
   pluginReact.configs.flat.recommended,
+  pluginReact.configs.flat['jsx-runtime'],
   {
     languageOptions: {
       ...pluginReact.configs.flat.recommended.languageOptions,

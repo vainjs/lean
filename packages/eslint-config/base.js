@@ -34,6 +34,7 @@ export default [
           allow: ['arrowFunctions'],
         },
       ],
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
       '@typescript-eslint/consistent-type-imports': 'error',
       'import/newline-after-import': 'error',
       'import/no-unresolved': 'off',

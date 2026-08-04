@@ -9,7 +9,6 @@ export const CONFIG_TEMPLATES: ConfigTemplates = {
       scripts: {
         preinstall: 'npx only-allow pnpm',
       },
-      packageManager: 'pnpm@10.0.0',
     },
   },
   eslint: {
