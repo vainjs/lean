@@ -1,5 +1,11 @@
 # @vainjs/eslint-config
 
+## 0.3.0
+
+### Minor Changes
+
+- ([`a3c5d16`](https://github.com/vainjs/lean/commit/a3c5d161981bdb0e4357a284b37127e8e1ab15de))
+
 ## 0.2.0
 
 ### Minor Changes
